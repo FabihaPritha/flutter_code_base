@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-import 'package:flutter_code_base/core/models/response_data.dart';
 import 'package:flutter_code_base/core/services/storage_service.dart';
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
+import '../models/response_data.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart';
 
@@ -14,22 +14,19 @@ class NetworkCaller {
   static final NetworkCaller _instance = NetworkCaller._internal();
   factory NetworkCaller() => _instance;
 
-  final int timeoutDuration = 3;
+  final int timeoutDuration = 30;
 
   // Build headers with optional token
   Map<String, String> _headers({String? token}) {
     final savedToken = token ?? StorageService.getToken();
     return {
       'Authorization': savedToken ?? '',
-
-      // 'Authorization': savedToken != null ? 'Bearer $savedToken' : '',
       'Content-type': 'application/json',
     };
   }
 
   // GET request method
   Future<ResponseData> getRequest(String endpoint, {String? token}) async {
-    // final url = '${UrlPath.baseUrl}$endpoint';
     log('GET Request: $endpoint');
     try {
       final response = await get(
@@ -49,7 +46,6 @@ class NetworkCaller {
     Map<String, dynamic>? body,
     String? token,
   }) async {
-    // final url = '${UrlPath.baseUrl}$endpoint';
     log('POST Request: $endpoint');
     log('Request Body: ${jsonEncode(body)}');
 
@@ -72,7 +68,6 @@ class NetworkCaller {
     Map<String, dynamic>? body,
     String? token,
   }) async {
-    // final url = '${UrlPath.baseUrl}$endpoint';
     log('PATCH Request: $endpoint');
     log('Request Body: ${jsonEncode(body)}');
 
@@ -89,13 +84,50 @@ class NetworkCaller {
     }
   }
 
+  // PUT request method
+  Future<ResponseData> putRequest(
+    String endpoint, {
+    Map<String, dynamic>? body,
+    String? token,
+  }) async {
+    log('PUT Request: $endpoint');
+    log('Request Body: ${jsonEncode(body)}');
+
+    try {
+      final response = await put(
+        Uri.parse(endpoint),
+        headers: _headers(token: token),
+        body: jsonEncode(body),
+      ).timeout(Duration(seconds: timeoutDuration));
+
+      return _handleResponse(response);
+    } catch (e) {
+      return _handleError(e);
+    }
+  }
+
+  // DELETE request method
+  Future<ResponseData> deleteRequest(String endpoint, {String? token}) async {
+    log('DELETE Request: $endpoint');
+
+    try {
+      final response = await delete(
+        Uri.parse(endpoint),
+        headers: _headers(token: token),
+      ).timeout(Duration(seconds: timeoutDuration));
+
+      return _handleResponse(response);
+    } catch (e) {
+      return _handleError(e);
+    }
+  }
+
   // General method for multipart requests (for file uploads like images)
   Future<ResponseData> multipartRequest(
     String endpoint, {
     required String filePath,
     String? token,
   }) async {
-    // final url = '${UrlPath.baseUrl}$endpoint';
     log('Multipart Request: $endpoint');
 
     // Create the multipart request
@@ -164,7 +196,7 @@ class NetworkCaller {
 
     final decodedResponse = jsonDecode(response.body);
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       if (decodedResponse['success'] == true) {
         return ResponseData(
           isSuccess: true,

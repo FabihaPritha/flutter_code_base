@@ -42,6 +42,7 @@ class CustomTextField extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final bool enabled;
+  final Widget? suffixIcon;
 
   const CustomTextField({
     super.key,
@@ -70,6 +71,7 @@ class CustomTextField extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.enabled = true,
+    this.suffixIcon,
   });
 
   @override
@@ -189,16 +191,39 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 },
                 tooltip: _obscureText ? 'Show password' : 'Hide password',
               )
-            : (widget.icon != null
-                  ? Padding(
-                      padding: EdgeInsets.only(right: 8.w),
-                      child: Icon(
-                        widget.icon,
-                        color: widget.suffixIconColor ?? Colors.grey,
-                      ),
-                    )
-                  : null),
+            : widget.suffixIcon ??
+                  (widget.icon != null
+                      ? Padding(
+                          padding: EdgeInsets.only(right: 8.w),
+                          child: Icon(
+                            widget.icon,
+                            color: widget.suffixIconColor ?? Colors.grey,
+                          ),
+                        )
+                      : null),
       ),
     );
   }
 }
+
+
+
+// CustomTextField(
+//   isPasswordField: true,
+//   hintText: 'Enter password',
+// )
+
+// CustomTextField(
+//   hintText: 'Search here',
+//   suffixIcon: IconButton(
+//     icon: Icon(Icons.search, color: Colors.grey),
+//     onPressed: () {},
+//   ),
+// )
+
+// CustomTextField(
+//   hintText: 'Username',
+//   icon: Icons.person,
+// )
+
+
