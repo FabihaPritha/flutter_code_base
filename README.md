@@ -7,9 +7,7 @@ A Flutter application built with **MVVM Architecture**, **Riverpod** state manag
 This project follows the **Model-View-ViewModel (MVVM)** architectural pattern with **Riverpod** for state management and **GoRouter** for navigation, providing a clean, scalable, and maintainable codebase.
 
 📖 **Complete Documentation:**
-- **`ARCHITECTURE_GUIDE.md`** - Full architecture explanation and best practices
-- **`QUICK_START.md`** - Quick reference guide with examples
-- **`MIGRATION_GUIDE.md`** - Migration notes from GetX to Riverpod + GoRouter
+- **`COMPLETE_GUIDE.md`** - Full architecture explanation and best practices
 
 ### Project Structure
 
