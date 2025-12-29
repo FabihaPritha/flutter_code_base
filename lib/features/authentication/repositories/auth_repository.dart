@@ -1,6 +1,6 @@
 import 'dart:developer';
 import 'package:flutter_code_base/core/constants/api_constants.dart';
-import 'package:flutter_code_base/core/services/api_service.dart';
+import 'package:flutter_code_base/core/services/network_caller.dart';
 import 'package:flutter_code_base/core/services/storage_service.dart';
 import 'package:flutter_code_base/features/authentication/models/user_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,18 +8,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Authentication Repository
 /// Handles all authentication-related API calls and data operations
 class AuthRepository {
-  final ApiService _apiService;
+  final NetworkCaller _networkCaller;
 
-  AuthRepository(this._apiService);
+  AuthRepository(this._networkCaller);
 
   /// Login with email and password
   Future<UserModel> login(String email, String password) async {
     log('AuthRepository: Attempting login for $email');
 
     final request = LoginRequest(email: email, password: password);
-    final response = await _apiService.post(
+    final response = await _networkCaller.postRequest(
       ApiConstants.login,
-      data: request.toJson(),
+      body: request.toJson(),
     );
 
     if (response.isSuccess && response.responseData != null) {
@@ -63,9 +63,9 @@ class AuthRepository {
       phoneNumber: phoneNumber,
     );
 
-    final response = await _apiService.post(
+    final response = await _networkCaller.postRequest(
       ApiConstants.register,
-      data: request.toJson(),
+      body: request.toJson(),
     );
 
     if (response.isSuccess && response.responseData != null) {
@@ -96,7 +96,7 @@ class AuthRepository {
 
     try {
       // Call logout API (optional)
-      await _apiService.post(ApiConstants.logout);
+      await _networkCaller.postRequest(ApiConstants.logout);
     } catch (e) {
       log('AuthRepository: Logout API call failed: $e');
       // Continue with local logout even if API fails
@@ -131,9 +131,9 @@ class AuthRepository {
   Future<void> forgotPassword(String email) async {
     log('AuthRepository: Requesting password reset for $email');
 
-    final response = await _apiService.post(
+    final response = await _networkCaller.postRequest(
       ApiConstants.forgotPassword,
-      data: {'email': email},
+      body: {'email': email},
     );
 
     if (!response.isSuccess) {
@@ -150,9 +150,9 @@ class AuthRepository {
   }) async {
     log('AuthRepository: Resetting password');
 
-    final response = await _apiService.post(
+    final response = await _networkCaller.postRequest(
       ApiConstants.resetPassword,
-      data: {'token': token, 'newPassword': newPassword},
+      body: {'token': token, 'newPassword': newPassword},
     );
 
     if (!response.isSuccess) {
@@ -189,6 +189,5 @@ class AuthRepository {
 
 /// Auth Repository Provider
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  final apiService = ref.watch(apiServiceProvider);
-  return AuthRepository(apiService);
+  return AuthRepository(NetworkCaller());
 });
