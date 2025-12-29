@@ -11,56 +11,56 @@ class ApiConstants {
   static const String fullBaseUrl = '$baseUrl$apiVersion';
 
   // ==================== Authentication Endpoints ====================
-  static const String login = '/auth/login';
-  static const String register = '/auth/register';
-  static const String logout = '/auth/logout';
-  static const String refreshToken = '/auth/refresh';
-  static const String forgotPassword = '/auth/forgot-password';
-  static const String resetPassword = '/auth/reset-password';
-  static const String verifyEmail = '/auth/verify-email';
+  static const String login = '$fullBaseUrl/auth/login';
+  static const String register = '$fullBaseUrl/auth/register';
+  static const String logout = '$fullBaseUrl/auth/logout';
+  static const String refreshToken = '$fullBaseUrl/auth/refresh';
+  static const String forgotPassword = '$fullBaseUrl/auth/forgot-password';
+  static const String resetPassword = '$fullBaseUrl/auth/reset-password';
+  static const String verifyEmail = '$fullBaseUrl/auth/verify-email';
 
   // ==================== User Endpoints ====================
-  static const String userProfile = '/user/profile';
-  static const String updateProfile = '/user/profile';
-  static const String changePassword = '/user/change-password';
-  static const String uploadAvatar = '/user/avatar';
+  static const String userProfile = '$fullBaseUrl/user/profile';
+  static const String updateProfile = '$fullBaseUrl/user/profile';
+  static const String changePassword = '$fullBaseUrl/user/change-password';
+  static const String uploadAvatar = '$fullBaseUrl/user/avatar';
 
   // ==================== Example: Product Endpoints ====================
-  static const String products = '/products';
-  static String productDetails(String id) => '/products/$id';
-  static const String createProduct = '/products';
-  static String updateProduct(String id) => '/products/$id';
-  static String deleteProduct(String id) => '/products/$id';
+  static const String products = '$fullBaseUrl/products';
+  static String productDetails(String id) => '$fullBaseUrl/products/$id';
+  static const String createProduct = '$fullBaseUrl/products';
+  static String updateProduct(String id) => '$fullBaseUrl/products/$id';
+  static String deleteProduct(String id) => '$fullBaseUrl/products/$id';
 
   // ==================== Example: Order Endpoints ====================
-  static const String orders = '/orders';
-  static String orderDetails(String id) => '/orders/$id';
-  static const String createOrder = '/orders';
-  static String cancelOrder(String id) => '/orders/$id/cancel';
+  static const String orders = '$fullBaseUrl/orders';
+  static String orderDetails(String id) => '$fullBaseUrl/orders/$id';
+  static const String createOrder = '$fullBaseUrl/orders';
+  static String cancelOrder(String id) => '$fullBaseUrl/orders/$id/cancel';
 
   // ==================== Add Your Endpoints Here ====================
-  // static const String yourEndpoint = '/your-endpoint';
+  // static const String yourEndpoint = '$fullBaseUrl/your-endpoint';
 
   // ==================== Helper Methods ====================
 
   /// Get full URL for an endpoint
-  static String getFullUrl(String endpoint) {
-    if (endpoint.startsWith('http')) {
-      return endpoint; // Already a full URL
-    }
-    return '$fullBaseUrl$endpoint';
-  }
+  // static String getFullUrl(String endpoint) {
+  //   if (endpoint.startsWith('http')) {
+  //     return endpoint; // Already a full URL
+  //   }
+  //   return '$fullBaseUrl$endpoint';
+  // }
 
   /// Get URL with query parameters
-  static String getUrlWithParams(String endpoint, Map<String, dynamic> params) {
-    final uri = Uri.parse(getFullUrl(endpoint));
-    final newUri = uri.replace(
-      queryParameters: params.map(
-        (key, value) => MapEntry(key, value.toString()),
-      ),
-    );
-    return newUri.toString();
-  }
+  // static String getUrlWithParams(String endpoint, Map<String, dynamic> params) {
+  //   final uri = Uri.parse(getFullUrl(endpoint));
+  //   final newUri = uri.replace(
+  //     queryParameters: params.map(
+  //       (key, value) => MapEntry(key, value.toString()),
+  //     ),
+  //   );
+  //   return newUri.toString();
+  // }
 }
 
 /// API Response Codes

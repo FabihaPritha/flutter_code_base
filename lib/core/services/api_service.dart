@@ -78,7 +78,7 @@ class ApiService {
       }
 
       final response = await _dio.post(
-        ApiConstants.getFullUrl(ApiConstants.refreshToken),
+        ApiConstants.refreshToken,
         data: {'refresh_token': refreshToken},
         options: Options(headers: {'Content-Type': 'application/json'}),
       );
@@ -199,7 +199,7 @@ class ApiService {
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
-      final url = ApiConstants.getFullUrl(endpoint);
+      final url = ApiConstants.createOrder;
       final response = await _dio.get(url, queryParameters: queryParameters);
       return _handleResponse(response);
     } catch (e) {
@@ -214,7 +214,7 @@ class ApiService {
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
-      final url = ApiConstants.getFullUrl(endpoint);
+      final url = ApiConstants.createOrder;
       final response = await _dio.post(
         url,
         data: data,
@@ -233,7 +233,7 @@ class ApiService {
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
-      final url = ApiConstants.getFullUrl(endpoint);
+      final url = ApiConstants.createOrder;
       final response = await _dio.put(
         url,
         data: data,
@@ -252,7 +252,7 @@ class ApiService {
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
-      final url = ApiConstants.getFullUrl(endpoint);
+      final url = ApiConstants.createOrder;
       final response = await _dio.patch(
         url,
         data: data,
@@ -271,7 +271,7 @@ class ApiService {
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
-      final url = ApiConstants.getFullUrl(endpoint);
+      final url = ApiConstants.createOrder;
       final response = await _dio.delete(
         url,
         data: data,
@@ -291,7 +291,7 @@ class ApiService {
     Map<String, dynamic>? additionalData,
   }) async {
     try {
-      final url = ApiConstants.getFullUrl(endpoint);
+      final url = ApiConstants.createOrder;
       final formData = FormData.fromMap({
         fieldName: await MultipartFile.fromFile(filePath),
         if (additionalData != null) ...additionalData,
@@ -315,7 +315,7 @@ class ApiService {
     ProgressCallback? onReceiveProgress,
   }) async {
     try {
-      final url = ApiConstants.getFullUrl(endpoint);
+      final url = ApiConstants.createOrder;
       final response = await _dio.download(
         url,
         savePath,
