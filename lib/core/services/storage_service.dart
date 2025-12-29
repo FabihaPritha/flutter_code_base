@@ -8,6 +8,7 @@ class StorageService {
 
   static const String _isLoggedInKey = 'isLoggedIn';
   static const String _tokenKey = 'token';
+  static const String _refreshTokenKey = 'refreshToken';
   static const String _userIdKey = 'userId';
   static const String _firstNameKey = 'firstName';
   static const String _lastNameKey = 'lastName';
@@ -42,6 +43,15 @@ class StorageService {
 
   static String? getToken() {
     return _preferences?.getString(_tokenKey);
+  }
+
+  // Refresh Token methods
+  static Future<void> saveRefreshToken(String refreshToken) async {
+    await _preferences?.setString(_refreshTokenKey, refreshToken);
+  }
+
+  static String? getRefreshToken() {
+    return _preferences?.getString(_refreshTokenKey);
   }
 
   static Future<void> saveUserId(String userId) async {
@@ -115,9 +125,15 @@ class StorageService {
     await _preferences?.remove(_phoneNumberKey);
     await _preferences?.remove(_roleKey);
     await _preferences?.remove(_tokenKey);
+    await _preferences?.remove(_refreshTokenKey);
     await _preferences?.remove(_userIdKey);
     await _preferences?.remove(_passwordKey);
     await _preferences?.remove(_provider);
     await makeLoggedOut();
+  }
+
+  // Alias for clearAllUserData (for API service)
+  static Future<void> clearAll() async {
+    await clearAllUserData();
   }
 }

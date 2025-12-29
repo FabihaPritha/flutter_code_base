@@ -1,54 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class AppHelperFunctions {
   AppHelperFunctions._();
-  static void showSnackBar(String message) {
+
+  static void showSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(
-      Get.context!,
+      context,
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  static void showImageSourceDialog() {
-    Get.bottomSheet(
-      Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-        ),
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: Icon(Icons.camera_alt),
-              title: Text("Take Photo"),
-              onTap: () {
-                Get.back();
-                ImagePicker().pickImage(
-                  source: ImageSource.camera,
-                  imageQuality: 85,
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.photo_library),
-              title: Text("Choose from Gallery"),
-              onTap: () {
-                Get.back();
-                ImagePicker().pickImage(source: ImageSource.gallery);
-              },
-            ),
-          ],
-        ),
-      ),
+  static void showImageSourceDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text("Take Photo"),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  ImagePicker().pickImage(
+                    source: ImageSource.camera,
+                    imageQuality: 85,
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text("Choose from Gallery"),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  ImagePicker().pickImage(source: ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  static void showAlert(String title, String message) {
+  static void showAlert(BuildContext context, String title, String message) {
     showDialog(
-      context: Get.context!,
+      context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(title),
@@ -80,16 +83,16 @@ class AppHelperFunctions {
     return Theme.of(context).brightness == Brightness.dark;
   }
 
-  static Size screenSize() {
-    return MediaQuery.of(Get.context!).size;
+  static Size screenSize(BuildContext context) {
+    return MediaQuery.of(context).size;
   }
 
-  static double screenHeight() {
-    return MediaQuery.of(Get.context!).size.height;
+  static double screenHeight(BuildContext context) {
+    return MediaQuery.of(context).size.height;
   }
 
-  static double screenWidth() {
-    return MediaQuery.of(Get.context!).size.width;
+  static double screenWidth(BuildContext context) {
+    return MediaQuery.of(context).size.width;
   }
 
   static String getFormattedDate(

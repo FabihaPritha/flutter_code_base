@@ -1,27 +1,36 @@
 # Flutter Code Base
 
-A Flutter application built with **MVC Architecture** and **GetX** state management.
+A Flutter application built with **MVVM Architecture**, **Riverpod** state management, and **GoRouter** for navigation.
 
 ## Architecture
 
-This project follows the **Model-View-Controller (MVC)** architectural pattern with **GetX** for state management, providing a clean, scalable, and maintainable codebase.
+This project follows the **Model-View-ViewModel (MVVM)** architectural pattern with **Riverpod** for state management and **GoRouter** for navigation, providing a clean, scalable, and maintainable codebase.
+
+📖 **Complete Documentation:**
+- **`ARCHITECTURE_GUIDE.md`** - Full architecture explanation and best practices
+- **`QUICK_START.md`** - Quick reference guide with examples
+- **`MIGRATION_GUIDE.md`** - Migration notes from GetX to Riverpod + GoRouter
 
 ### Project Structure
 
 ```
 lib/
 ├── core/                    # Core functionality
-│   ├── bindings/           # GetX dependency injection bindings
+│   ├── constants/          # API & app constants
 │   ├── common/             # Common widgets and utilities
-│   ├── localization/       # Internationalization support
-│   ├── models/             # Data models
+│   ├── models/             # Shared data models
+│   ├── providers/          # Global Riverpod providers
 │   ├── services/           # API services and business logic
 │   ├── utils/              # Utility functions and helpers
 │   └── websocketMethod/    # WebSocket implementation
-├── features/               # Feature-based modules
+├── features/               # Feature-based modules (MVVM)
 │   ├── authentication/    # Authentication feature
+│   │   ├── models/        # Data models
+│   │   ├── repositories/  # Data operations
+│   │   ├── providers/     # State management (ViewModel)
+│   │   └── views/         # UI screens
 │   └── splash_screen/     # Splash screen feature
-├── routes/                # Application routing
+├── routes/                # Application routing (GoRouter)
 │   └── app_routes.dart
 └── main.dart              # Application entry point
 ```
@@ -29,8 +38,10 @@ lib/
 ## Technologies Used
 
 - **Flutter SDK**: ^3.8.1
-- **GetX**: ^4.7.2 - State management, dependency injection, and routing
+- **Riverpod**: ^2.6.1 - Modern state management
+- **GoRouter**: ^14.7.0 - Declarative routing
 - **HTTP**: ^1.5.0 - API communication
+- **Dio**: ^5.9.0 - Advanced HTTP client
 - **Flutter ScreenUtil**: ^5.9.3 - Responsive UI design
 - **Google Fonts**: ^6.3.2 - Custom fonts
 - **Shared Preferences**: ^2.5.3 - Local storage

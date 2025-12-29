@@ -1,277 +1,476 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:developer';
-import 'package:flutter_code_base/core/services/storage_service.dart';
-import 'package:http/http.dart';
-import 'package:http/http.dart' as http;
-import '../models/response_data.dart';
-import 'package:http_parser/http_parser.dart';
-import 'package:path/path.dart';
+// import 'dart:async';
+// import 'dart:convert';
+// import 'dart:developer';
+// import 'package:dio/dio.dart';
+// import 'package:flutter_code_base/core/services/storage_service.dart';
+// import 'package:get/get.dart';
+// import 'package:http/http.dart';
+// import 'package:http/http.dart' as http;
+// import '../models/response_data.dart';
+// import 'package:http_parser/http_parser.dart';
+// import 'package:path/path.dart';
 
-class NetworkCaller {
-  // Singleton pattern for NetworkCaller
-  NetworkCaller._internal();
-  static final NetworkCaller _instance = NetworkCaller._internal();
-  factory NetworkCaller() => _instance;
+// class NetworkCaller {
+//   // 🔒 Singleton pattern
+//   NetworkCaller._internal();
+//   static final NetworkCaller _instance = NetworkCaller._internal();
+//   factory NetworkCaller() => _instance;
 
-  final int timeoutDuration = 30;
+//   final Dio _dio = Dio(
+//     BaseOptions(
+//       connectTimeout: const Duration(seconds: 30),
+//       receiveTimeout: const Duration(seconds: 30),
+//       contentType: 'application/json',
+//     ),
+//   );
 
-  // Build headers with optional token
-  Map<String, String> _headers({String? token}) {
-    final savedToken = token ?? StorageService.getToken();
-    return {
-      'Authorization': savedToken ?? '',
-      'Content-type': 'application/json',
-    };
-  }
+//   // 🧾 Build headers with optional token
+//   Map<String, dynamic> _headers({String? token}) {
+//     final savedToken = token ?? StorageService.getToken();
+//     final headers = <String, dynamic>{'Content-Type': 'application/json'};
 
-  // GET request method
-  Future<ResponseData> getRequest(String endpoint, {String? token}) async {
-    log('GET Request: $endpoint');
-    try {
-      final response = await get(
-        Uri.parse(endpoint),
-        headers: _headers(token: token),
-      ).timeout(Duration(seconds: timeoutDuration));
+//     log(
+//       'NetworkCaller: Retrieved token: ${savedToken != null ? "Present (${savedToken.length} chars)" : "Missing"}',
+//     );
 
-      return _handleResponse(response);
-    } catch (e) {
-      return _handleError(e);
-    }
-  }
+//     // Add Authorization header only if token exists
+//     if (savedToken != null && savedToken.isNotEmpty) {
+//       headers['Authorization'] = 'Bearer $savedToken';
+//       log('NetworkCaller: Added Bearer token to headers');
+//     } else {
+//       log('NetworkCaller: No token available, skipping Authorization header');
+//     }
 
-  // POST request method
-  Future<ResponseData> postRequest(
-    String endpoint, {
-    Map<String, dynamic>? body,
-    String? token,
-  }) async {
-    log('POST Request: $endpoint');
-    log('Request Body: ${jsonEncode(body)}');
+//     return headers;
+//   }
 
-    try {
-      final response = await post(
-        Uri.parse(endpoint),
-        headers: _headers(token: token),
-        body: jsonEncode(body),
-      ).timeout(Duration(seconds: timeoutDuration));
+//   // ========================== HTTP METHODS ============================ //
 
-      return _handleResponse(response);
-    } catch (e) {
-      return _handleError(e);
-    }
-  }
+//   Future<ResponseData> getRequest(String endpoint, {String? token}) async {
+//     log('GET Request: $endpoint');
+//     try {
+//       final response = await _dio.get(
+//         endpoint,
+//         options: Options(headers: _headers(token: token)),
+//       );
+//       return _handleResponse(response);
+//     } catch (e) {
+//       // Handle 401 error and attempt token refresh (skip for auth endpoints)
+//       if (await _shouldRetryWithTokenRefresh(e) && !_isAuthEndpoint(endpoint)) {
+//         log('NetworkCaller: Retrying GET request after token refresh');
+//         try {
+//           final retryResponse = await _dio.get(
+//             endpoint,
+//             options: Options(headers: _headers(token: token)),
+//           );
+//           return _handleResponse(retryResponse);
+//         } catch (retryError) {
+//           return _handleError(retryError);
+//         }
+//       }
+//       return _handleError(e);
+//     }
+//   }
 
-  // PATCH request method
-  Future<ResponseData> patchRequest(
-    String endpoint, {
-    Map<String, dynamic>? body,
-    String? token,
-  }) async {
-    log('PATCH Request: $endpoint');
-    log('Request Body: ${jsonEncode(body)}');
+//   Future<ResponseData> postRequest(
+//     String endpoint, {
+//     Map<String, dynamic>? body,
+//     String? token,
+//   }) async {
+//     log('POST Request: $endpoint');
+//     log('Request Body: ${jsonEncode(body)}');
+//     try {
+//       final response = await _dio.post(
+//         endpoint,
+//         data: body,
+//         options: Options(headers: _headers(token: token)),
+//       );
+//       return _handleResponse(response);
+//     } catch (e) {
+//       // Handle 401 error and attempt token refresh (skip for auth endpoints)
+//       if (await _shouldRetryWithTokenRefresh(e) && !_isAuthEndpoint(endpoint)) {
+//         log('NetworkCaller: Retrying POST request after token refresh');
+//         try {
+//           final retryResponse = await _dio.post(
+//             endpoint,
+//             data: body,
+//             options: Options(headers: _headers(token: token)),
+//           );
+//           return _handleResponse(retryResponse);
+//         } catch (retryError) {
+//           return _handleError(retryError);
+//         }
+//       }
+//       return _handleError(e);
+//     }
+//   }
 
-    try {
-      final response = await patch(
-        Uri.parse(endpoint),
-        headers: _headers(token: token),
-        body: jsonEncode(body),
-      ).timeout(Duration(seconds: timeoutDuration));
+//   Future<ResponseData> patchRequest(
+//     String endpoint, {
+//     Map<String, dynamic>? body,
+//     String? token,
+//   }) async {
+//     log('PATCH Request: $endpoint');
+//     try {
+//       final response = await _dio.patch(
+//         endpoint,
+//         data: body,
+//         options: Options(headers: _headers(token: token)),
+//       );
+//       return _handleResponse(response);
+//     } catch (e) {
+//       // Handle 401 error and attempt token refresh (skip for auth endpoints)
+//       if (await _shouldRetryWithTokenRefresh(e) && !_isAuthEndpoint(endpoint)) {
+//         log('NetworkCaller: Retrying PATCH request after token refresh');
+//         try {
+//           final retryResponse = await _dio.patch(
+//             endpoint,
+//             data: body,
+//             options: Options(headers: _headers(token: token)),
+//           );
+//           return _handleResponse(retryResponse);
+//         } catch (retryError) {
+//           return _handleError(retryError);
+//         }
+//       }
+//       return _handleError(e);
+//     }
+//   }
 
-      return _handleResponse(response);
-    } catch (e) {
-      return _handleError(e);
-    }
-  }
+//   Future<ResponseData> putRequest(
+//     String endpoint, {
+//     Map<String, dynamic>? body,
+//     String? token,
+//   }) async {
+//     log('PUT Request: $endpoint');
+//     try {
+//       final response = await _dio.put(
+//         endpoint,
+//         data: body,
+//         options: Options(headers: _headers(token: token)),
+//       );
+//       return _handleResponse(response);
+//     } catch (e) {
+//       // Handle 401 error and attempt token refresh (skip for auth endpoints)
+//       if (await _shouldRetryWithTokenRefresh(e) && !_isAuthEndpoint(endpoint)) {
+//         log('NetworkCaller: Retrying PUT request after token refresh');
+//         try {
+//           final retryResponse = await _dio.put(
+//             endpoint,
+//             data: body,
+//             options: Options(headers: _headers(token: token)),
+//           );
+//           return _handleResponse(retryResponse);
+//         } catch (retryError) {
+//           return _handleError(retryError);
+//         }
+//       }
+//       return _handleError(e);
+//     }
+//   }
 
-  // PUT request method
-  Future<ResponseData> putRequest(
-    String endpoint, {
-    Map<String, dynamic>? body,
-    String? token,
-  }) async {
-    log('PUT Request: $endpoint');
-    log('Request Body: ${jsonEncode(body)}');
+//   Future<ResponseData> deleteRequest(
+//     String endpoint, {
+//     Map<String, dynamic>? body,
+//     String? token,
+//   }) async {
+//     log('DELETE Request: $endpoint');
+//     try {
+//       final response = await _dio.delete(
+//         endpoint,
+//         data: body,
+//         options: Options(headers: _headers(token: token)),
+//       );
+//       return _handleResponse(response);
+//     } catch (e) {
+//       // Handle 401 error and attempt token refresh (skip for auth endpoints)
+//       if (await _shouldRetryWithTokenRefresh(e) && !_isAuthEndpoint(endpoint)) {
+//         log('NetworkCaller: Retrying DELETE request after token refresh');
+//         try {
+//           final retryResponse = await _dio.delete(
+//             endpoint,
+//             data: body,
+//             options: Options(headers: _headers(token: token)),
+//           );
+//           return _handleResponse(retryResponse);
+//         } catch (retryError) {
+//           return _handleError(retryError);
+//         }
+//       }
+//       return _handleError(e);
+//     }
+//   }
 
-    try {
-      final response = await put(
-        Uri.parse(endpoint),
-        headers: _headers(token: token),
-        body: jsonEncode(body),
-      ).timeout(Duration(seconds: timeoutDuration));
+//   // ========================== MULTIPART (FILE UPLOAD) ============================ //
 
-      return _handleResponse(response);
-    } catch (e) {
-      return _handleError(e);
-    }
-  }
+//   Future<ResponseData> multipartRequest(
+//     String endpoint, {
+//     required String filePath,
+//     String? token,
+//   }) async {
+//     log('Multipart Request: $endpoint');
 
-  // DELETE request method
-  Future<ResponseData> deleteRequest(String endpoint, {String? token}) async {
-    log('DELETE Request: $endpoint');
+//     final fileExtension = extension(filePath).toLowerCase();
+//     String contentType;
+//     switch (fileExtension) {
+//       case '.jpg':
+//       case '.jpeg':
+//         contentType = 'image/jpeg';
+//         break;
+//       case '.png':
+//         contentType = 'image/png';
+//         break;
+//       case '.gif':
+//         contentType = 'image/gif';
+//         break;
+//       default:
+//         throw Exception("Unsupported image format: $fileExtension");
+//     }
 
-    try {
-      final response = await delete(
-        Uri.parse(endpoint),
-        headers: _headers(token: token),
-      ).timeout(Duration(seconds: timeoutDuration));
+//     final formData = FormData.fromMap({
+//       'profile_picture': await MultipartFile.fromFile(
+//         filePath,
+//         contentType: DioMediaType.parse(contentType),
+//       ),
+//     });
 
-      return _handleResponse(response);
-    } catch (e) {
-      return _handleError(e);
-    }
-  }
+//     try {
+//       final response = await _dio.patch(
+//         endpoint,
+//         data: formData,
+//         options: Options(
+//           headers: {
+//             ..._headers(token: token),
+//             'Content-Type': 'multipart/form-data',
+//           },
+//         ),
+//       );
+//       return _handleResponse(response);
+//     } catch (e) {
+//       // Handle 401 error and attempt token refresh (skip for auth endpoints)
+//       if (await _shouldRetryWithTokenRefresh(e) && !_isAuthEndpoint(endpoint)) {
+//         log('NetworkCaller: Retrying multipart request after token refresh');
+//         try {
+//           final retryFormData = FormData.fromMap({
+//             'profile_picture': await MultipartFile.fromFile(
+//               filePath,
+//               contentType: DioMediaType.parse(contentType),
+//             ),
+//           });
 
-  // General method for multipart requests (for file uploads like images)
-  Future<ResponseData> multipartRequest(
-    String endpoint, {
-    required String filePath,
-    String? token,
-  }) async {
-    log('Multipart Request: $endpoint');
+//           final retryResponse = await _dio.patch(
+//             endpoint,
+//             data: retryFormData,
+//             options: Options(
+//               headers: {
+//                 ..._headers(token: token),
+//                 'Content-Type': 'multipart/form-data',
+//               },
+//             ),
+//           );
+//           return _handleResponse(retryResponse);
+//         } catch (retryError) {
+//           return _handleError(retryError);
+//         }
+//       }
+//       return _handleError(e);
+//     }
+//   }
 
-    // Create the multipart request
-    var request = http.MultipartRequest('PATCH', Uri.parse(endpoint));
-    request.headers['Authorization'] = token ?? '';
+//   // ========================== RESPONSE HANDLING ============================ //
 
-    String fileExtension = extension(filePath).toLowerCase();
-    String contentType;
-    switch (fileExtension) {
-      case '.jpg':
-      case '.jpeg':
-        contentType = 'image/jpeg';
-        break;
-      case '.png':
-        contentType = 'image/png';
-        break;
-      case '.gif':
-        contentType = 'image/gif';
-        break;
-      default:
-        throw Exception("Unsupported image format: $fileExtension");
-    }
+//   ResponseData _handleResponse(Response response) {
+//     log('Response Status: ${response.statusCode}');
+//     log('Response Data: ${response.data}');
 
-    var imageFile = await http.MultipartFile.fromPath(
-      'image',
-      filePath,
-      contentType: MediaType.parse(contentType),
-    );
-    request.files.add(imageFile);
+//     final data = response.data is String
+//         ? jsonDecode(response.data)
+//         : response.data;
 
-    try {
-      var response = await request.send();
-      if (response.statusCode == 200) {
-        var responseBody = await response.stream.bytesToString();
-        log('Response Body: $responseBody');
-        return ResponseData(
-          isSuccess: true,
-          statusCode: response.statusCode,
-          responseData: jsonDecode(responseBody),
-          errorMessage: '',
-        );
-      } else {
-        log('Error response: ${response.statusCode}');
-        return ResponseData(
-          isSuccess: false,
-          statusCode: response.statusCode,
-          responseData: '',
-          errorMessage: 'Failed to upload image: ${response.statusCode}',
-        );
-      }
-    } catch (e) {
-      log('Error: $e');
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        responseData: '',
-        errorMessage: 'An unexpected error occurred while uploading the image.',
-      );
-    }
-  }
+//     if (response.statusCode == 200 || response.statusCode == 201) {
+//       // Handle different response formats
+//       if (data is List) {
+//         // If response is a List (like subscription plans API), it's successful
+//         return ResponseData(
+//           isSuccess: true,
+//           statusCode: response.statusCode!,
+//           responseData: data,
+//           errorMessage: '',
+//         );
+//       } else if (data is Map<String, dynamic>) {
+//         // Check if success field exists and is true, or if no success field exists (assume success)
+//         if (!data.containsKey('success') || data['success'] == true) {
+//           return ResponseData(
+//             isSuccess: true,
+//             statusCode: response.statusCode!,
+//             responseData: data,
+//             errorMessage: '',
+//           );
+//         } else {
+//           return ResponseData(
+//             isSuccess: false,
+//             statusCode: response.statusCode!,
+//             responseData: data,
+//             errorMessage: data['message'] ?? 'Unknown error occurred',
+//           );
+//         }
+//       } else {
+//         // For other data types, assume success
+//         return ResponseData(
+//           isSuccess: true,
+//           statusCode: response.statusCode!,
+//           responseData: data,
+//           errorMessage: '',
+//         );
+//       }
+//     } else if (response.statusCode == 400) {
+//       return ResponseData(
+//         isSuccess: false,
+//         statusCode: response.statusCode!,
+//         responseData: data,
+//         errorMessage: data is Map<String, dynamic>
+//             ? _extractErrorMessages(data['errorSources'])
+//             : 'Bad Request',
+//       );
+//     } else if (response.statusCode == 500) {
+//       return ResponseData(
+//         isSuccess: false,
+//         statusCode: response.statusCode!,
+//         responseData: '',
+//         errorMessage: data is Map<String, dynamic>
+//             ? (data['message'] ?? 'Internal Server Error')
+//             : 'Internal Server Error',
+//       );
+//     } else {
+//       return ResponseData(
+//         isSuccess: false,
+//         statusCode: response.statusCode!,
+//         responseData: data,
+//         errorMessage: data is Map<String, dynamic>
+//             ? (data['message'] ?? 'Unexpected error occurred')
+//             : 'Unexpected error occurred',
+//       );
+//     }
+//   }
 
-  // Handle successful response
-  ResponseData _handleResponse(Response response) {
-    log('Response Status: ${response.statusCode}');
-    log('Response Body: ${response.body}');
+//   String _extractErrorMessages(dynamic errorSources) {
+//     if (errorSources is List) {
+//       return errorSources
+//           .map((e) => e['message'] ?? 'Unknown error')
+//           .join(', ');
+//     }
+//     return 'Validation error';
+//   }
 
-    final decodedResponse = jsonDecode(response.body);
+//   // ========================== TOKEN REFRESH HELPERS ============================ //
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      if (decodedResponse['success'] == true) {
-        return ResponseData(
-          isSuccess: true,
-          statusCode: response.statusCode,
-          responseData: decodedResponse,
-          errorMessage: '',
-        );
-      } else {
-        return ResponseData(
-          isSuccess: false,
-          statusCode: response.statusCode,
-          responseData: decodedResponse,
-          errorMessage: decodedResponse['message'] ?? 'Unknown error occurred',
-        );
-      }
-    } else if (response.statusCode == 400) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: response.statusCode,
-        responseData: decodedResponse,
-        errorMessage: _extractErrorMessages(decodedResponse['errorSources']),
-      );
-    } else if (response.statusCode == 500) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: response.statusCode,
-        responseData: '',
-        errorMessage:
-            decodedResponse['message'] ?? 'An unexpected error occurred!',
-      );
-    } else {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: response.statusCode,
-        responseData: decodedResponse,
-        errorMessage: decodedResponse['message'] ?? 'An unknown error occurred',
-      );
-    }
-  }
+//   /// Check if the error is 401 and attempt token refresh
+//   // Future<bool> _shouldRetryWithTokenRefresh(dynamic error) async {
+//   //   if (error is DioException && error.response?.statusCode == 401) {
+//   //     log('NetworkCaller: Received 401, attempting token refresh...');
 
-  // Handle error responses
-  String _extractErrorMessages(dynamic errorSources) {
-    if (errorSources is List) {
-      return errorSources
-          .map((error) => error['message'] ?? 'Unknown error')
-          .join(', ');
-    }
-    return 'Validation error';
-  }
+//   //     // Use LoginService to refresh token
+//   //     try {
+//   //       final loginService = LoginService();
+//   //       final refreshResult = await loginService.refreshAccessToken();
 
-  // Handle any exception or network errors
-  ResponseData _handleError(dynamic error) {
-    log('Request Error: $error');
+//   //       if (refreshResult.isSuccess) {
+//   //         log('NetworkCaller: Token refresh successful, will retry request');
+//   //         return true;
+//   //       } else {
+//   //         log(
+//   //           'NetworkCaller: Token refresh failed - ${refreshResult.errorMessage}',
+//   //         );
+//   //         // Clear stored data and force re-login
+//   //         await StorageService.clearAllUserData();
+//   //         return false;
+//   //       }
+//   //     } catch (e) {
+//   //       log('NetworkCaller: Error during token refresh - $e');
+//   //       return false;
+//   //     }
+//   //   }
 
-    if (error is ClientException) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        responseData: '',
-        errorMessage: 'Network error occurred. Please check your connection.',
-      );
-    } else if (error is TimeoutException) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 408,
-        responseData: '',
-        errorMessage: 'Request timeout. Please try again later.',
-      );
-    } else {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        responseData: '',
-        errorMessage: 'Unexpected error occurred.',
-      );
-    }
-  }
-}
+//   //   return false;
+//   // }
+
+//   /// Check if the endpoint is an auth endpoint (to avoid infinite loops)
+//   bool _isAuthEndpoint(String endpoint) {
+//     return endpoint.contains('/auth/login/') ||
+//         endpoint.contains('/auth/register/') ||
+//         endpoint.contains('/auth/logout/') ||
+//         endpoint.contains('/auth/token/refresh/');
+//   }
+
+//   // ========================== ERROR HANDLING ============================ //
+
+//   ResponseData _handleError(dynamic error) {
+//     log('Request Error: $error');
+
+//     if (error is DioException) {
+//       switch (error.type) {
+//         case DioExceptionType.connectionTimeout:
+//         case DioExceptionType.receiveTimeout:
+//           return ResponseData(
+//             isSuccess: false,
+//             statusCode: 408,
+//             responseData: '',
+//             errorMessage: 'Request timeout. Please try again later.',
+//           );
+
+//         case DioExceptionType.badResponse:
+//           final statusCode = error.response?.statusCode ?? 500;
+//           String errorMessage = 'Server returned an error response.';
+
+//           if (statusCode == 401) {
+//             errorMessage = 'Authentication failed. Please login again.';
+//           } else if (statusCode == 403) {
+//             errorMessage =
+//                 'Access forbidden. You may not have permission to access this resource.';
+//           } else if (error.response?.data != null &&
+//               error.response!.data is Map) {
+//             errorMessage =
+//                 error.response!.data['message'] ??
+//                 error.response!.data['detail'] ??
+//                 errorMessage;
+//           }
+
+//           log(
+//             'NetworkCaller: BadResponse - Status: $statusCode, Message: $errorMessage',
+//           );
+//           log('NetworkCaller: Response data: ${error.response?.data}');
+
+//           return ResponseData(
+//             isSuccess: false,
+//             statusCode: statusCode,
+//             responseData: error.response?.data ?? '',
+//             errorMessage: errorMessage,
+//           );
+
+//         case DioExceptionType.connectionError:
+//           return ResponseData(
+//             isSuccess: false,
+//             statusCode: 500,
+//             responseData: '',
+//             errorMessage:
+//                 'Network connection failed. Please check your internet connection.',
+//           );
+
+//         default:
+//           return ResponseData(
+//             isSuccess: false,
+//             statusCode: 500,
+//             responseData: '',
+//             errorMessage: 'Unexpected error occurred.',
+//           );
+//       }
+//     }
+
+//     return ResponseData(
+//       isSuccess: false,
+//       statusCode: 500,
+//       responseData: '',
+//       errorMessage: 'Unknown error occurred.',
+//     );
+//   }
+// }
