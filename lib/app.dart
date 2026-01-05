@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_code_base/routes/app_routes.dart';
+import 'package:flutter_code_base/routes/go_router_provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class MyApp extends StatelessWidget {
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           ),
-          routerConfig: AppRoutes.router,
+          routerConfig: GoRouterProvider.router,
           debugShowCheckedModeBanner: false,
         );
       },
